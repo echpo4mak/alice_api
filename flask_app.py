@@ -18,7 +18,7 @@ sessionStorage = {}
 
 
 # Задаем параметры приложения Flask.
-@app.route("/", methods=['POST'])
+@app.route("/post", methods=['POST'])
 def main():
     # Функция получает тело запроса и возвращает ответ.
     logging.info('Request: %r', request.json)
