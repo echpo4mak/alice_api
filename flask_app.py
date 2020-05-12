@@ -28,6 +28,7 @@ logging.basicConfig(level=logging.INFO)
 # Когда он откажется купить слона,
 # то мы уберем одну подсказку. Как будто что-то меняется :)
 sessionStorage = {}
+obj = 'слона'
 
 
 @app.route('/post', methods=['POST'])
@@ -60,6 +61,7 @@ def main():
 
 
 def handle_dialog(req, res):
+    global obj
     user_id = req['session']['user_id']
 
     if req['session']['new']:
@@ -75,7 +77,7 @@ def handle_dialog(req, res):
             ]
         }
         # Заполняем текст ответа
-        res['response']['text'] = 'Привет! Купи слона!'
+        res['response']['text'] = f'Привет! Купи {obj}!'
         # Получим подсказки
         res['response']['buttons'] = get_suggests(user_id)
         return
@@ -95,18 +97,24 @@ def handle_dialog(req, res):
         'хорошо'
     ]:
         # Пользователь согласился, прощаемся.
-        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
-        res['response']['end_session'] = True
+        res['response']['text'] = f'{obj} можно найти на Яндекс.Маркете!'
+        if obj == 'слона':
+            obj = 'кролика'
+        elif obj == 'кролика':
+            obj = 'end'
+        if obj == 'end':
+            res['response']['end_session'] = True
         return
 
     # Если нет, то убеждаем его купить слона!
     res['response']['text'] = \
-        f"Все говорят '{req['request']['original_utterance']}', а ты купи слона!"
+        f"Все говорят '{req['request']['original_utterance']}', а ты купи {obj}!"
     res['response']['buttons'] = get_suggests(user_id)
 
 
 # Функция возвращает две подсказки для ответа.
 def get_suggests(user_id):
+    global obj
     session = sessionStorage[user_id]
 
     # Выбираем две первые подсказки из массива.
@@ -124,7 +132,7 @@ def get_suggests(user_id):
     if len(suggests) < 2:
         suggests.append({
             "title": "Ладно",
-            "url": "https://market.yandex.ru/search?text=слон",
+            "url": f"https://market.yandex.ru/search?text={obj}",
             "hide": True
         })
 
